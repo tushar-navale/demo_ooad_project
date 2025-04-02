@@ -12,9 +12,14 @@ export default function Profile({ user }) {
 
     useEffect(() => {
         const fetchProfile = async () => {
-            const { data } = await axios.get(`/api/users/${id}`);
-            setProfile(data);
-            setFormData(data);
+            try {
+                const { data } = await axios.get(`http://localhost:8080/api/users/${id}`);
+                setProfile(data);
+                setFormData(data);
+            } catch (error) {
+                console.error('Profile fetch error:', error);
+                //setError('Failed to load profile');
+            }
         };
         fetchProfile();
     }, [id]);
