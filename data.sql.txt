@@ -1,0 +1,287 @@
+use trainer;
+
+-- Users Table (Central Entity)
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    age INT,
+    gender ENUM('Male', 'Female', 'Other'),
+    weight DECIMAL(5,2),
+    height DECIMAL(5,2),
+    fitness_level ENUM('Beginner', 'Intermediate', 'Advanced'),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Exercises Table (Independent)
+CREATE TABLE exercises (
+    exercise_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    muscle_group VARCHAR(50),
+    equipment_required VARCHAR(100),
+    difficulty_level ENUM('Easy', 'Medium', 'Hard')
+);
+
+-- Workout Plans (User's Plans)
+CREATE TABLE workout_plans (
+    plan_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    plan_name VARCHAR(100) NOT NULL,
+    goal TEXT,
+    duration_weeks INT,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- Junction Table: WorkoutPlans ↔ Exercises (Many-to-Many)
+CREATE TABLE plan_exercises (
+    plan_id INT,
+    exercise_id INT,
+    PRIMARY KEY (plan_id, exercise_id),
+    FOREIGN KEY (plan_id) REFERENCES workout_plans(plan_id) ON DELETE CASCADE,
+    FOREIGN KEY (exercise_id) REFERENCES exercises(exercise_id) ON DELETE CASCADE
+);
+
+-- Workout Sessions (Logs)
+CREATE TABLE workout_sessions (
+    session_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    date DATE NOT NULL,
+    duration_minutes INT,
+    notes TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- Progress Tracker (Metrics Over Time)
+CREATE TABLE progress_tracker (
+    tracker_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    date DATE NOT NULL,
+    weight DECIMAL(5,2),
+    reps INT,
+    sets INT,
+    notes TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- Blog Posts (User-Generated Content)
+CREATE TABLE blog_posts (
+    post_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    content TEXT NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    likes_count INT DEFAULT 0,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- Comments on Posts
+CREATE TABLE comments (
+    comment_id INT AUTO_INCREMENT PRIMARY KEY,
+    post_id INT NOT NULL,
+    user_id INT NOT NULL,
+    content TEXT NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (post_id) REFERENCES blog_posts(post_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- Likes on Posts
+CREATE TABLE likes (
+    like_id INT AUTO_INCREMENT PRIMARY KEY,
+    post_id INT NOT NULL,
+    user_id INT NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (post_id) REFERENCES blog_posts(post_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    UNIQUE KEY (post_id, user_id) -- Prevent duplicate likes
+);
+
+-- Optional: Diet Plans
+CREATE TABLE diet_plans (
+    plan_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    meal_plan TEXT,
+    calorie_goal INT,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- Insert dummy data into the users table
+INSERT INTO users (name, age, gender, weight, height, fitness_level) VALUES
+('John Smith', 28, 'Male', 185.5, 180.3, 'Intermediate'),
+('Sarah Johnson', 34, 'Female', 142.2, 165.1, 'Advanced'),
+('Mike Wilson', 22, 'Male', 170.8, 175.5, 'Beginner'),
+('Emma Davis', 29, 'Female', 138.6, 162.8, 'Intermediate'),
+('Robert Jones', 45, 'Male', 210.3, 182.9, 'Beginner'),
+('Jennifer Lee', 31, 'Female', 145.5, 168.2, 'Advanced'),
+('David Brown', 27, 'Male', 175.0, 177.8, 'Intermediate'),
+('Lisa Garcia', 33, 'Female', 132.0, 160.0, 'Beginner'),
+('Chris Martinez', 39, 'Male', 190.6, 179.1, 'Advanced'),
+('Amy Robinson', 25, 'Female', 128.7, 163.5, 'Intermediate');
+
+-- Insert dummy data into the exercises table
+INSERT INTO exercises (name, muscle_group, equipment_required, difficulty_level) VALUES
+('Bench Press', 'Chest', 'Barbell, Bench', 'Medium'),
+('Squats', 'Legs', 'Barbell, Squat Rack', 'Hard'),
+('Pull-ups', 'Back', 'Pull-up Bar', 'Hard'),
+('Push-ups', 'Chest', 'None', 'Easy'),
+('Deadlift', 'Back, Legs', 'Barbell', 'Hard'),
+('Bicep Curls', 'Arms', 'Dumbbells', 'Easy'),
+('Shoulder Press', 'Shoulders', 'Dumbbells', 'Medium'),
+('Plank', 'Core', 'None', 'Medium'),
+('Lunges', 'Legs', 'None, Dumbbells (optional)', 'Medium'),
+('Tricep Dips', 'Arms', 'Dip bars, Bench', 'Medium'),
+('Russian Twists', 'Core', 'Medicine ball (optional)', 'Easy'),
+('Leg Press', 'Legs', 'Leg Press Machine', 'Medium'),
+('Lat Pulldown', 'Back', 'Cable Machine', 'Medium'),
+('Jumping Jacks', 'Cardio', 'None', 'Easy'),
+('Mountain Climbers', 'Core, Cardio', 'None', 'Medium');
+
+-- Insert dummy data into the workout_plans table
+INSERT INTO workout_plans (user_id, plan_name, goal, duration_weeks) VALUES
+(1, 'Strength Builder', 'Increase overall strength and muscle mass', 12),
+(2, 'Advanced HIIT', 'Improve cardiovascular endurance and maintain muscle', 8),
+(3, 'Beginner Basics', 'Learn proper form and build foundational strength', 16),
+(4, 'Tone & Shape', 'Tone muscles without significant mass gain', 10),
+(5, 'Weight Loss Focus', 'Reduce body fat while maintaining muscle', 12),
+(7, 'Bodybuilding Split', 'Increase muscle definition and size', 14),
+(8, 'Functional Fitness', 'Improve everyday movement and prevent injury', 8),
+(9, 'Power Development', 'Enhance explosive power and strength', 10),
+(2, 'Marathon Prep', 'Build endurance for long-distance running', 16),
+(6, 'Posture Improvement', 'Strengthen back and core for better posture', 12);
+
+-- Insert dummy data into the plan_exercises junction table
+INSERT INTO plan_exercises (plan_id, exercise_id) VALUES
+(1, 1), (1, 2), (1, 5), (1, 7), (1, 13),
+(2, 3), (2, 8), (2, 14), (2, 15), (2, 11),
+(3, 4), (3, 6), (3, 8), (3, 9), (3, 14),
+(4, 4), (4, 6), (4, 8), (4, 10), (4, 11),
+(5, 2), (5, 14), (5, 15), (5, 9), (5, 8),
+(6, 1), (6, 3), (6, 5), (6, 6), (6, 7),
+(7, 1), (7, 2), (7, 5), (7, 6), (7, 7),
+(8, 4), (8, 8), (8, 9), (8, 11), (8, 15),
+(9, 1), (9, 2), (9, 5), (9, 7), (9, 12),
+(10, 3), (10, 5), (10, 8), (10, 11), (10, 13);
+
+-- Insert dummy data into the workout_sessions table
+INSERT INTO workout_sessions (user_id, date, duration_minutes, notes) VALUES
+(1, '2025-03-25', 65, 'Felt strong today, increased weights on all exercises'),
+(1, '2025-03-27', 55, 'Slightly tired but completed full workout'),
+(2, '2025-03-26', 75, 'Intense HIIT session, new personal best on burpees'),
+(2, '2025-03-28', 70, 'Focused on form rather than speed today'),
+(3, '2025-03-25', 45, 'First session with trainer, learning proper form'),
+(3, '2025-03-27', 50, 'Slight improvement in form, added light weights'),
+(4, '2025-03-28', 60, 'Great pump in arms and shoulders'),
+(5, '2025-03-26', 80, 'Extended cardio session after strength training'),
+(6, '2025-03-27', 65, 'Back feeling much better after focused exercises'),
+(7, '2025-03-25', 70, 'Chest day, new PR on bench press'),
+(8, '2025-03-28', 45, 'Short session focusing on core stability'),
+(9, '2025-03-26', 85, 'Heavy lifting day, focusing on power moves'),
+(10, '2025-03-27', 55, 'Recovery workout with light weights and stretching');
+
+-- Insert dummy data into the progress_tracker table
+INSERT INTO progress_tracker (user_id, date, weight, reps, sets, notes) VALUES
+(1, '2025-03-01', 185.5, NULL, NULL, 'Starting weight'),
+(1, '2025-03-15', 183.2, NULL, NULL, 'Down 2.3 lbs'),
+(1, '2025-03-27', 182.0, NULL, NULL, 'Continuing to lose slowly'),
+(1, '2025-03-27', NULL, 8, 3, 'Bench press: 185 lbs'),
+(2, '2025-03-02', 142.2, NULL, NULL, 'Starting weight'),
+(2, '2025-03-16', 141.5, NULL, NULL, 'Maintaining while building muscle'),
+(2, '2025-03-28', NULL, 12, 4, 'Pull-ups with perfect form'),
+(3, '2025-03-05', 170.8, NULL, NULL, 'Starting weight'),
+(3, '2025-03-20', 168.5, NULL, NULL, 'Weight decreasing, muscle definition improving'),
+(3, '2025-03-27', NULL, 10, 2, 'First time completing 2 sets of 10 push-ups'),
+(4, '2025-03-10', 138.6, NULL, NULL, 'Starting measurement'),
+(4, '2025-03-28', 137.8, NULL, NULL, 'Slight decrease in weight, feeling stronger'),
+(5, '2025-03-15', 210.3, NULL, NULL, 'Starting weight'),
+(5, '2025-03-26', 207.1, NULL, NULL, 'Down 3.2 lbs in first two weeks'),
+(6, '2025-03-12', 145.5, NULL, NULL, 'Weight stable, focusing on performance'),
+(7, '2025-03-05', 175.0, NULL, NULL, 'Starting weight'),
+(7, '2025-03-25', NULL, 5, 5, 'Deadlift: 225 lbs, new personal record'),
+(8, '2025-03-10', 132.0, NULL, NULL, 'Starting weight'),
+(9, '2025-03-08', 190.6, NULL, NULL, 'Starting weight'),
+(9, '2025-03-26', NULL, 3, 5, 'Squat: 275 lbs');
+
+-- Insert dummy data into the blog_posts table
+INSERT INTO blog_posts (user_id, title, content, likes_count) VALUES
+(2, 'My HIIT Journey', 'After 8 weeks of high-intensity interval training, I\'ve seen tremendous improvements in my endurance and recovery time. Here\'s what worked for me...', 14),
+(7, 'The Perfect Chest Day', 'Struggling with building chest muscles? I\'ve compiled my top 5 exercises that transformed my chest development over the past year.', 21),
+(4, 'Women\'s Strength Training Myths', 'Let\'s debunk some common myths about women and weightlifting. Contrary to popular belief, lifting heavy weights won\'t make you bulky...', 35),
+(9, 'Nutrition for Power Athletes', 'Your diet is just as important as your training when it comes to developing explosive power. Here\'s my meal plan that supports heavy lifting...', 28),
+(1, 'From Skinny to Strong', 'My transformation journey over the past 6 months has taught me valuable lessons about progressive overload and nutrition...', 16),
+(5, 'Weight Loss After 40', 'It\'s never too late to start your fitness journey. Here are the adjustments I\'ve made to my routine that work well for my age group...', 19),
+(8, 'How I Fixed My Posture', 'Years of desk work left me with terrible posture. These exercises have been game-changers for my back pain and alignment...', 24),
+(3, 'Beginner\'s Guide to Gym Equipment', 'Feeling intimidated by all the machines at the gym? This post breaks down the most common equipment and how to use it properly.', 31),
+(6, 'My Favorite Post-Workout Meals', 'Recovery nutrition is crucial for muscle growth. Here are my top 5 quick and easy high-protein meals to fuel recovery.', 17),
+(10, 'Finding Time to Work Out as a Parent', 'Balancing parenting and fitness isn\'t easy, but it\'s possible. Here\'s how I fit in effective workouts with a busy family schedule.', 22);
+
+-- Insert dummy data into the comments table
+INSERT INTO comments (post_id, user_id, content) VALUES
+(1, 3, 'This is exactly what I needed to read as a beginner. Thanks for sharing!'),
+(1, 5, 'Have you tried incorporating weights into your HIIT routine?'),
+(2, 1, 'Definitely going to try your chest routine next week!'),
+(2, 9, 'Incline bench press has been a game-changer for me too.'),
+(3, 8, 'Thank you for addressing these myths! Sharing this with my friends.'),
+(3, 2, 'Couldn\'t agree more. I\'ve been lifting heavy for years and love the results.'),
+(4, 7, 'Great meal plan ideas. What do you think about pre-workout nutrition?'),
+(5, 6, 'Your transformation is inspiring! How long did it take to see initial results?'),
+(5, 10, 'What was the hardest part of your journey?'),
+(6, 4, 'As someone in my 40s too, I appreciate these specific tips!'),
+(7, 3, 'My posture has improved so much following similar exercises!'),
+(8, 5, 'Wish I had this guide when I first started at the gym. So helpful!'),
+(9, 1, 'That smoothie recipe sounds delicious, will try it tomorrow.'),
+(10, 6, 'As a fellow parent, these are great practical tips. Morning workouts have been key for me too.');
+
+-- Insert dummy data into the likes table
+INSERT INTO likes (post_id, user_id) VALUES
+(1, 3), (1, 4), (1, 5), (1, 7), (1, 9), (1, 10),
+(2, 1), (2, 3), (2, 5), (2, 6), (2, 8), (2, 10),
+(3, 1), (3, 2), (3, 5), (3, 7), (3, 8), (3, 9), (3, 10),
+(4, 1), (4, 2), (4, 3), (4, 5), (4, 6), (4, 7), (4, 8),
+(5, 2), (5, 3), (5, 7), (5, 8), (5, 9),
+(6, 1), (6, 4), (6, 7), (6, 8), (6, 10),
+(7, 1), (7, 2), (7, 3), (7, 5), (7, 6), (7, 9), (7, 10),
+(8, 2), (8, 4), (8, 5), (8, 6), (8, 7), (8, 9), (8, 10),
+(9, 2), (9, 3), (9, 4), (9, 5), (9, 8),
+(10, 1), (10, 3), (10, 4), (10, 5), (10, 7), (10, 9);
+
+-- Insert dummy data into the diet_plans table
+INSERT INTO diet_plans (user_id, meal_plan, calorie_goal) VALUES
+(1, 'High protein, moderate carbs, focuses on lean meats, eggs, protein shakes, whole grains, and vegetables. 5 meals per day.', 2800),
+(2, 'Balanced macros with emphasis on timing around HIIT workouts. Complex carbs before, protein and simple carbs after.', 2200),
+(3, 'Beginner nutrition plan with gradual changes. Focus on replacing processed foods with whole foods and proper hydration.', 2500),
+(4, 'Moderate calorie, high protein plan. Emphasis on protein at every meal and complex carbohydrates around workouts.', 1900),
+(5, 'Caloric deficit with high protein to preserve muscle. Intermittent fasting approach with 8-hour eating window.', 2000),
+(6, 'Performance-focused nutrition with timed carbohydrate intake. Higher calories on training days, maintenance on rest days.', 2400),
+(7, 'Bodybuilding diet with precise macro tracking. High protein, cyclical carbohydrates, and moderate fats.', 3000),
+(8, 'Anti-inflammatory focus with plenty of omega-3s, antioxidants, and whole foods. Limited processed items and added sugars.', 1800),
+(9, 'Power athlete diet with higher carbohydrates, moderate protein, and strategic supplement timing. Focuses on performance.', 3200),
+(10, 'Balanced nutrition plan designed for busy schedules. Includes meal prep strategies and quick protein-rich options.', 1950);
+
+//for this create web based application that follows MVC architecture with GRASP principles, should contain everything from login page to personal details and to blogging page, i am using java spring-boot
+
+ALTER TABLE users
+ADD COLUMN email VARCHAR(20) NOT NULL UNIQUE,
+ADD COLUMN password VARCHAR(10) NOT NULL;
+
+mysql> UPDATE users SET
+    ->     email = CONCAT(LOWER(SUBSTRING_INDEX(name, ' ', 1)), '_', age, '@example.com'),
+    ->     password = '123';
+Query OK, 10 rows affected (0.03 sec)
+Rows matched: 10  Changed: 10  Warnings: 0
+
+
+mysql> select * from users;
++---------+----------------+------+--------+--------+--------+---------------+---------------------+-------------------------+----------+
+| user_id | name           | age  | gender | weight | height | fitness_level | created_at          | email                   | password |
++---------+----------------+------+--------+--------+--------+---------------+---------------------+-------------------------+----------+
+|       1 | John Smith     |   28 | Male   | 185.50 | 180.30 | Intermediate  | 2025-03-30 19:29:55 | john_28@example.com     | 123      |
+|       2 | Sarah Johnson  |   34 | Female | 142.20 | 165.10 | Advanced      | 2025-03-30 19:29:55 | sarah_34@example.com    | 123      |
+|       3 | Mike Wilson    |   22 | Male   | 170.80 | 175.50 | Beginner      | 2025-03-30 19:29:55 | mike_22@example.com     | 123      |
+|       4 | Emma Davis     |   29 | Female | 138.60 | 162.80 | Intermediate  | 2025-03-30 19:29:55 | emma_29@example.com     | 123      |
+|       5 | Robert Jones   |   45 | Male   | 210.30 | 182.90 | Beginner      | 2025-03-30 19:29:55 | robert_45@example.com   | 123      |
+|       6 | Jennifer Lee   |   31 | Female | 145.50 | 168.20 | Advanced      | 2025-03-30 19:29:55 | jennifer_31@example.com | 123      |
+|       7 | David Brown    |   27 | Male   | 175.00 | 177.80 | Intermediate  | 2025-03-30 19:29:55 | david_27@example.com    | 123      |
+|       8 | Lisa Garcia    |   33 | Female | 132.00 | 160.00 | Beginner      | 2025-03-30 19:29:55 | lisa_33@example.com     | 123      |
+|       9 | Chris Martinez |   39 | Male   | 190.60 | 179.10 | Advanced      | 2025-03-30 19:29:55 | chris_39@example.com    | 123      |
+|      10 | Amy Robinson   |   25 | Female | 128.70 | 163.50 | Intermediate  | 2025-03-30 19:29:55 | amy_25@example.com      | 123      |
++---------+----------------+------+--------+--------+--------+---------------+---------------------+-------------------------+----------+
+10 rows in set (0.00 sec)
