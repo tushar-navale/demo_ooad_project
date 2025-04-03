@@ -6,12 +6,17 @@ import axios from 'axios';
 export default function Login({ setUser }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [name, setName] = useState('');  // Added name field
     const [isRegister, setIsRegister] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const validateInputs = () => {
+        if (isRegister && !name) {
+            setError('Name is required for registration');
+            return false;
+        }
         if (!email || !password) {
             setError('Please fill in all fields');
             return false;
@@ -21,7 +26,7 @@ export default function Login({ setUser }) {
             return false;
         }
         if (password.length < 2) {
-            setError('Password must be at least 6 characters');
+            setError('Password must be at least 2 characters');
             return false;
         }
         return true;
@@ -37,24 +42,35 @@ export default function Login({ setUser }) {
     
         setLoading(true);
         try {
-            // Remove withCredentials and simplify the request
-            const response = await axios.post(
-                'http://localhost:8080/api/auth/login',
-                { email, password }
-            );
+            const endpoint = isRegister ? '/api/auth/register' : '/api/auth/login';
+            const payload = isRegister 
+                ? { name, email, password }
+                : { email, password };
+
+            const response = await axios({
+                method: 'POST',
+                url: `http://localhost:8080${endpoint}`,
+                data: payload,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                withCredentials: true
+            });
             
-            const { data } = response;
-            console.log('Login response:', data); // Add logging
-            
-            if (data && data.id) {
-                setUser(data);
-                navigate(`/profile/${data.id}`);
+            console.log('Response:', response); // Debug log
+
+            if (response.status === 200 && response.data) {
+                setUser(response.data);
+                navigate(`/profile/${response.data.id}`);
             } else {
                 setError('Invalid response from server');
             }
         } catch (error) {
-            console.error('Login error details:', error.response || error);
-            setError('Login failed. Please try again.');
+            console.error('Request error:', error.response || error);
+            const errorMessage = error.response?.data?.message 
+                || error.message 
+                || 'Authentication failed. Please try again.';
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -74,6 +90,18 @@ export default function Login({ setUser }) {
                 )}
 
                 <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
+                    {isRegister && (
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
+                            label="Name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            disabled={loading}
+                            error={!!error && error.includes('name')}
+                        />
+                    )}
                     <TextField
                         margin="normal"
                         required
@@ -113,6 +141,9 @@ export default function Login({ setUser }) {
                         onClick={() => {
                             setIsRegister(!isRegister);
                             setError('');
+                            setName('');
+                            setEmail('');
+                            setPassword('');
                         }}
                         fullWidth
                         variant="text"

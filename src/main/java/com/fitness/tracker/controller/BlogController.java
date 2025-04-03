@@ -1,67 +1,44 @@
 package com.fitness.tracker.controller;
 
 import com.fitness.tracker.model.BlogPost;
-import com.fitness.tracker.model.Comment;
-import com.fitness.tracker.repository.BlogPostRepository;
-import com.fitness.tracker.repository.CommentRepository;
-import com.fitness.tracker.repository.UserRepository;
+import com.fitness.tracker.service.BlogService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.fitness.tracker.model.User;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/blogs")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class BlogController {
-    @Autowired
-    private BlogPostRepository blogPostRepository;
     
     @Autowired
-    private CommentRepository commentRepository;
-    
-    @Autowired
-    private UserRepository userRepository;
+    private BlogService blogService;
 
     @GetMapping
-    public List<BlogPost> getAllBlogs() {
-        return blogPostRepository.findAllByOrderByCreatedAtDesc();
+    public ResponseEntity<List<BlogPost>> getAllBlogs() {
+        return ResponseEntity.ok(blogService.getAllBlogs());
     }
 
-    @GetMapping("/user/{userId}")
-    public List<BlogPost> getUserBlogs(@PathVariable Long userId) {
-        return blogPostRepository.findByUserId(userId);
+    @PostMapping
+    public ResponseEntity<BlogPost> createBlog(@RequestBody BlogPost blog) {
+        return ResponseEntity.ok(blogService.createBlog(blog));
     }
 
-    @PostMapping("/{userId}")
-    public BlogPost createBlog(@PathVariable Long userId, @RequestBody BlogPost blogPost) {
-        User user = userRepository.findById(userId).orElse(null);
-        if (user != null) {
-            blogPost.setUser(user);
-            return blogPostRepository.save(blogPost);
-        }
-        return null;
+    @PutMapping("/{id}")
+    public ResponseEntity<BlogPost> updateBlog(@PathVariable Long id, @RequestBody BlogPost blogDetails) {
+        return ResponseEntity.ok(blogService.updateBlog(id, blogDetails));
     }
 
-    @PostMapping("/{postId}/like")
-    public BlogPost likeBlog(@PathVariable Long postId) {
-        BlogPost post = blogPostRepository.findById(postId).orElse(null);
-        if (post != null) {
-            post.setLikes(post.getLikes() + 1);
-            return blogPostRepository.save(post);
-        }
-        return null;
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteBlog(@PathVariable Long id) {
+        blogService.deleteBlog(id);
+        return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{postId}/comment/{userId}")
-    public Comment addComment(@PathVariable Long postId, @PathVariable Long userId, @RequestBody Comment comment) {
-        BlogPost post = blogPostRepository.findById(postId).orElse(null);
-        User user = userRepository.findById(userId).orElse(null);
-        if (post != null && user != null) {
-            comment.setPost(post);
-            comment.setUser(user);
-            return commentRepository.save(comment);
-        }
-        return null;
+    @PostMapping("/{id}/like")
+    public ResponseEntity<BlogPost> likeBlog(@PathVariable Long id) {
+        return ResponseEntity.ok(blogService.likeBlog(id));
     }
 }
