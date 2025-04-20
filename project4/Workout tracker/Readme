@@ -1,0 +1,4 @@
+ javac -d out Main.java model\*.java controller\*.java view\*.java factory\*.java
+java -cp out Main
+
+("Test User", "test@example.com", "1234");
