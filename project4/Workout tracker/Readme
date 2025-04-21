@@ -2,3 +2,86 @@
 java -cp out Main
 
 ("Test User", "test@example.com", "1234");
+
+
+1. MVC (Model-View-Controller) – Application Architecture
+🔹 Where used:
+model/ package: User, Workout, WorkoutFactory, etc.
+
+view/ package: DashboardView, WorkoutEntryView, etc.
+
+controller/ package: WorkoutController, DashboardFacade
+
+🔹 Purpose:
+Separates concerns:
+
+Model: Represents data and logic (e.g., User, Workout)
+
+View: Handles GUI (e.g., DashboardView, WorkoutEntryView)
+
+Controller: Handles communication between view and model (WorkoutController)
+
+✅ 2. Factory Pattern – Object Creation
+🔹 Where used:
+WorkoutFactory in model/WorkoutFactory.java
+
+🔹 Purpose:
+Encapsulates the logic of creating Workout objects:
+
+java
+Copy
+Edit
+Workout workout = workoutFactory.createWorkout(date, type, duration, calories);
+Makes object creation more flexible and centralized
+
+Useful if later you want to create different types of workouts (e.g., Cardio, Strength) using the same factory
+
+✅ 3. Facade Pattern – Simplified Interface
+🔹 Where used:
+DashboardFacade in controller/DashboardFacade.java
+
+🔹 Purpose:
+Provides a unified interface to the system for the views:
+
+java
+Copy
+Edit
+dashboardFacade.addWorkout(...);
+dashboardFacade.getProgressReport();
+Hides the complexity of WorkoutController, ProgressTracker, and direct model manipulation
+
+Keeps the UI code clean and minimal
+
+✅ 4. Singleton Pattern (Optional / if implemented)
+🔹 Potential use:
+If you make DataManager or DashboardFacade a singleton:
+
+java
+Copy
+Edit
+public class DataManager {
+    private static DataManager instance = null;
+    private DataManager() {}
+    public static DataManager getInstance() {
+        if (instance == null) instance = new DataManager();
+        return instance;
+    }
+}
+🔹 Purpose:
+Ensures only one instance of a class (e.g., central data manager, config)
+
+Provides a global access point
+
+(Let me know if you'd like help making any class Singleton.)
+
+✅ 5. Builder Pattern (Optional / can be added to enhance Workout or User creation)
+🔹 Potential use for complex object creation:
+java
+Copy
+Edit
+User user = new UserBuilder().setName("Alice").setEmail("a@x.com").build();
+🔹 Purpose:
+Builds complex objects step-by-step
+
+Keeps constructors clean
+
