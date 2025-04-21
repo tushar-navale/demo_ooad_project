@@ -1,3 +1,5 @@
+//ProgressTracker
+
 package model;
 
 import model.Workout; // Ensure the Workout class is imported

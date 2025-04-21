@@ -1,23 +1,26 @@
 package controller;
 
-import model.User;
 import model.Workout;
+import model.WorkoutFactory;
+import model.User;
+import java.time.LocalDate;
 
 public class WorkoutController {
     private User user;
+    private WorkoutFactory workoutFactory;
 
+    // Constructor that accepts a User object
     public WorkoutController(User user) {
         this.user = user;
+        this.workoutFactory = new WorkoutFactory(); // Initialize the factory
     }
 
-    // Add this method to return the User object
-    public User getUser() {
-        return user;
-    }
+    // Method to create and save a workout
+    public void createAndSaveWorkout(LocalDate date, String type, int duration, int calories) {
+        // Use the factory to create the workout object
+        Workout workout = workoutFactory.createWorkout(date, type, duration, calories);
 
-    // Method to add a workout (for example)
-    public void addWorkout(Workout workout) {
+        // Save the workout by adding it to the user's workout list
         user.addWorkout(workout);
     }
 }
-

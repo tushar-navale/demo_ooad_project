@@ -1,3 +1,5 @@
+//DietPlan
+
 package model;
 
 public class DietPlan {

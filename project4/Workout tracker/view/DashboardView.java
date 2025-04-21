@@ -1,21 +1,20 @@
 package view;
 
-import controller.WorkoutController;
+import controller.DashboardFacade;
 import model.User;
 import model.Workout;
-import model.ProgressTracker;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class DashboardView extends JFrame {
     private User user;
-    private WorkoutController controller;
+    private DashboardFacade facade;
     private JTextArea workoutListArea;
 
     public DashboardView(User user) {
         this.user = user;
-        this.controller = new WorkoutController(user);
+        this.facade = new DashboardFacade(user);
 
         setTitle("Dashboard - " + user.getName());
         setSize(400, 400);
@@ -26,19 +25,19 @@ public class DashboardView extends JFrame {
         updateWorkoutList();
 
         JButton addBtn = new JButton("Add Workout");
-        addBtn.addActionListener(e -> new WorkoutEntryView(controller, this).setVisible(true));
+        addBtn.addActionListener(e -> new WorkoutEntryView(facade, this).setVisible(true));
 
         JButton progressBtn = new JButton("View Progress");
         progressBtn.addActionListener(e -> {
-            ProgressTracker tracker = new ProgressTracker(user);
-            String message = "Total Workouts: " + tracker.calculateTotalWorkouts() + "\n" +
-                             "Total Calories Burned: " + tracker.calculateTotalCaloriesBurned() + "\n" +
-                             "Average Workout Duration: " + tracker.calculateAverageWorkoutDuration() + " mins";
+            String message = facade.getProgressReport();
             JOptionPane.showMessageDialog(this, message, "Progress Report", JOptionPane.INFORMATION_MESSAGE);
         });
 
         JButton dietBtn = new JButton("View Diet Plan");
-        dietBtn.addActionListener(e -> new DietPlanView(user).setVisible(true));
+        dietBtn.addActionListener(e -> {
+            String message = facade.getDietPlan();
+            JOptionPane.showMessageDialog(this, message, "Diet Plan", JOptionPane.INFORMATION_MESSAGE);
+        });
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
         buttonPanel.add(addBtn);
@@ -58,9 +57,5 @@ public class DashboardView extends JFrame {
               .append(w.getCalories()).append(" cal\n");
         }
         workoutListArea.setText(sb.toString());
-    }
-
-    public JTextArea getWorkoutListArea() {
-        return workoutListArea;
     }
 }

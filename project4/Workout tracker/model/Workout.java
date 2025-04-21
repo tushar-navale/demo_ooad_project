@@ -15,8 +15,19 @@ public class Workout {
         this.calories = calories;
     }
 
-    public LocalDate getDate() { return date; }
-    public String getType() { return type; }
-    public int getDuration() { return duration; }
-    public int getCalories() { return calories; }
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public int getCalories() {
+        return calories;
+    }
 }

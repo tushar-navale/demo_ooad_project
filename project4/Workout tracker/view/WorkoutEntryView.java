@@ -1,8 +1,7 @@
 package view;
 
-import controller.WorkoutController;
+import controller.DashboardFacade;
 import model.Workout;
-import model.User;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,13 +9,13 @@ import java.awt.event.ActionEvent;
 import java.time.LocalDate;
 
 public class WorkoutEntryView extends JFrame {
-    private WorkoutController controller;
+    private DashboardFacade facade;
     private DashboardView dashboard;
     private JTextField typeField, durationField, caloriesField;
     private JButton saveButton;
 
-    public WorkoutEntryView(WorkoutController controller, DashboardView dashboard) {
-        this.controller = controller;
+    public WorkoutEntryView(DashboardFacade facade, DashboardView dashboard) {
+        this.facade = facade;
         this.dashboard = dashboard;
 
         setTitle("Workout Entry");
@@ -58,8 +57,8 @@ public class WorkoutEntryView extends JFrame {
             int calories = Integer.parseInt(caloriesField.getText());
             LocalDate date = LocalDate.now();
 
-            Workout workout = new Workout(date, type, duration, calories);
-            controller.addWorkout(workout); // Add to user's list
+            // Using the facade to add the workout
+            facade.addWorkout(date, type, duration, calories);
 
             JOptionPane.showMessageDialog(this, "Workout saved!");
             dashboard.updateWorkoutList(); // Refresh dashboard
