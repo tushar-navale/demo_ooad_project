@@ -172,8 +172,10 @@ public class WorkoutPlanBuilderView extends JFrame {
             }
         }
 
+        builder = new WorkoutPlan.Builder();
+        builder.setName(planName);
+        builder.addWorkout(w);
         WorkoutPlan plan = builder.build();
-        user.addWorkoutPlan(plan);
 
         // Display plan with improved formatting
         StringBuilder sb = new StringBuilder();
