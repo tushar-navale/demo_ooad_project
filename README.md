@@ -1,25 +1,29 @@
-# demo_ooad_project
-testing the project
+🏋️‍♂️ Digital Fitness Journal
+
+A full-stack fitness tracking platform built using Java Spring Boot, Java Swing, and MySQL that helps users track workouts, monitor progress, manage diet plans, and connect with others.
+Designed using Object-Oriented Analysis & Design (OOAD) principles and implemented with MVC architecture and GRASP design principles.
 
 
-npm install axios react-router-dom @mui/material @mui/icons-material
-(or)
-npm install
+🧠 Object-Oriented Design
 
-this you have to install separtely exclusively
-npm install @emotion/react @emotion/styled
+This project emphasizes OOAD principles including:
 
-install this dependency for the react component
+Abstraction, Encapsulation, Modularity, and Low Coupling
 
-and make sure to connect to your database.
-the DB that i created, due to some dependencies it created a copy of all those tables
-refer to the sql file for more info
-there are 3 sql files so refer to each other if you get stuck
+Implemented design patterns:
 
-git add .
+🏭 Factory Pattern – Centralized creation of workout objects
 
-git commit -m "msg"
+🧱 Builder Pattern – Simplified creation of complex objects (User, WorkoutPlan)
 
-git pull --rebase origin main
+🔒 Singleton Pattern – Global data management (DataManager)
 
-git push origin main
+🎯 Facade Pattern – Unified access to dashboard subsystems
+
+Architecture: MVC (Model–View–Controller)
+
+Model – Handles business logic and data persistence
+
+View – User interface built using Java Swing and Bootstrap
+
+Controller – Orchestrates communication between Model and View
